@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Especialista Trabalhista & Calculista</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.0.0/dist/tabler-icons.min.css">
+<style>
+  :root {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f5f5f0;
+    --bg-tertiary: #ededea;
+    --text-primary: #1a1a18;
+    --text-secondary: #6b6b66;
+    --text-muted: #9a9a94;
+    --border: rgba(0,0,0,0.1);
+    --border-md: rgba(0,0,0,0.18);
+    --accent: #042C53;
+    --accent-light: #0C447C;
+    --accent-subtle: #E6F1FB;
+    --accent-mid: #85B7EB;
+    --success: #639922;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    --font-mono: 'Fira Code', 'Consolas', monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg-primary: #1c1c1a;
+      --bg-secondary: #252523;
+      --bg-tertiary: #2e2e2b;
+      --text-primary: #f0f0ea;
+      --text-secondary: #a8a8a0;
+      --text-muted: #6b6b64;
+      --border: rgba(255,255,255,0.08);
+      --border-md: rgba(255,255,255,0.15);
+      --accent-subtle: #042C53;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font); background: var(--bg-tertiary); display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 16px; }
+  #app { display: flex; flex-direction: column; width: 100%; max-width: 960px; height: 90vh; min-height: 600px; background: var(--bg-primary); border: 0.5px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+  /* TOPBAR */
+  #topbar { display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-bottom: 0.5px solid var(--border); background: var(--accent); flex-shrink: 0; }
+  .av { width: 36px; height: 36px; border-radius: 50%; background: var(--accent-light); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .av i { color: var(--accent-mid); font-size: 18px; }
+  .ti-info { flex: 1; }
+  .ti-info .name { font-size: 14px; font-weight: 600; color: var(--accent-subtle); }
+  .ti-info .sub { font-size: 11px; color: var(--accent-mid); margin-top: 2px; }
+  .status { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #9FE1CB; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+  /* TABS */
+  #tabs { display: flex; border-bottom: 0.5px solid var(--border); flex-shrink: 0; background: var(--bg-secondary); }
+  .tab { flex: 1; padding: 11px 12px; font-size: 13px; font-weight: 500; color: var(--text-secondary); cursor: pointer; text-align: center; border-bottom: 2px solid transparent; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .tab:hover { color: var(--text-primary); background: var(--bg-tertiary); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); background: var(--bg-primary); }
+  /* CONTENT */
+  #content { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+  .panel { display: none; flex: 1; flex-direction: column; overflow: hidden; }
+  .panel.active { display: flex; }
+  /* CHIPS */
+  .chips { display: flex; gap: 6px; padding: 10px 14px; overflow-x: auto; flex-shrink: 0; border-bottom: 0.5px solid var(--border); scrollbar-width: none; }
+  .chips::-webkit-scrollbar { display: none; }
+  .chip { font-size: 12px; padding: 5px 11px; border-radius: 20px; border: 0.5px solid var(--border-md); background: var(--bg-primary); color: var(--text-secondary); cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: all 0.12s; }
+  .chip:hover { background: var(--bg-secondary); color: var(--text-primary); border-color: var(--accent); }
+  /* MESSAGES */
+  #msgs { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+  .msg { display: flex; gap: 10px; align-items: flex-start; }
+  .msg.user { flex-direction: row-reverse; }
+  .bubble { max-width: 78%; padding: 10px 14px; border-radius: 12px; font-size: 13.5px; line-height: 1.7; }
+  .msg.bot .bubble { background: var(--bg-secondary); color: var(--text-primary); border-radius: 4px 12px 12px 12px; }
+  .msg.user .bubble { background: var(--accent); color: var(--accent-subtle); border-radius: 12px 4px 12px 12px; }
+  .mav { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+  .bav { background: var(--accent); } .bav i { color: var(--accent-mid); font-size: 14px; }
+  .uav { background: var(--bg-secondary); } .uav i { color: var(--text-secondary); font-size: 14px; }
+  .typing { display: flex; gap: 4px; align-items: center; padding: 10px 14px; }
+  .typing span { width: 6px; height: 6px; background: var(--text-muted); border-radius: 50%; animation: blink 1.2s infinite; }
+  .typing span:nth-child(2){animation-delay:.2s} .typing span:nth-child(3){animation-delay:.4s}
+  @keyframes blink { 0%,80%,100%{opacity:.2} 40%{opacity:1} }
+  /* INPUT BAR */
+  #ibar { padding: 12px 14px; border-top: 0.5px solid var(--border); display: flex; gap: 8px; align-items: flex-end; flex-shrink: 0; background: var(--bg-primary); }
+  #uinput { flex: 1; resize: none; border: 0.5px solid var(--border-md); border-radius: var(--radius-md); padding: 9px 12px; font-size: 13.5px; font-family: var(--font); color: var(--text-primary); background: var(--bg-primary); outline: none; line-height: 1.5; max-height: 100px; min-height: 38px; }
+  #uinput:focus { border-color: var(--accent); }
+  #sbtn { width: 38px; height: 38px; border-radius: var(--radius-md); background: var(--accent); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: opacity 0.15s; }
+  #sbtn:hover { opacity: 0.85; }
+  #sbtn i { color: var(--accent-subtle); font-size: 16px; }
+  #sbtn:disabled { opacity: 0.4; cursor: not-allowed; }
+  /* PEÇAS SPLIT */
+  #pecas-split { display: flex; flex: 1; overflow: hidden; }
+  #sidebar { width: 230px; border-right: 0.5px solid var(--border); overflow-y: auto; flex-shrink: 0; background: var(--bg-secondary); }
+  #sidebar::-webkit-scrollbar { width: 4px; }
+  #sidebar::-webkit-scrollbar-thumb { background: var(--border-md); border-radius: 4px; }
+  .cat-title { font-size: 10px; font-weight: 700; color: var(--text-muted); padding: 12px 14px 5px; letter-spacing: .08em; text-transform: uppercase; }
+  .peca-item { padding: 7px 14px; font-size: 12.5px; color: var(--text-secondary); cursor: pointer; border-left: 2px solid transparent; transition: all 0.12s; line-height: 1.4; }
+  .peca-item:hover { background: var(--bg-primary); color: var(--text-primary); }
+  .peca-item.active { background: var(--bg-primary); color: var(--accent); border-left-color: var(--accent); font-weight: 600; }
+  /* FORM */
+  #pecas-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  #peca-form { flex: 1; overflow-y: auto; padding: 18px; }
+  #peca-form::-webkit-scrollbar { width: 4px; }
+  #peca-form::-webkit-scrollbar-thumb { background: var(--border-md); border-radius: 4px; }
+  #peca-form h3 { font-size: 15px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
+  #peca-form .desc { font-size: 12px; color: var(--text-secondary); margin-bottom: 16px; padding-bottom: 14px; border-bottom: 0.5px solid var(--border); }
+  .frow { margin-bottom: 12px; }
+  .frow label { display: block; font-size: 12px; font-weight: 500; color: var(--text-secondary); margin-bottom: 5px; }
+  .frow input, .frow select, .frow textarea { width: 100%; border: 0.5px solid var(--border-md); border-radius: var(--radius-md); padding: 8px 11px; font-size: 13px; font-family: var(--font); color: var(--text-primary); background: var(--bg-primary); outline: none; transition: border-color 0.12s; }
+  .frow input:focus, .frow select:focus, .frow textarea:focus { border-color: var(--accent); }
+  .frow textarea { resize: vertical; min-height: 64px; line-height: 1.5; }
+  .fgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .fbtn { width: 100%; padding: 10px; background: var(--accent); color: var(--accent-subtle); border: none; border-radius: var(--radius-md); font-size: 13.5px; font-weight: 600; cursor: pointer; margin-top: 8px; display: flex; align-items: center; justify-content: center; gap: 7px; transition: opacity 0.15s; }
+  .fbtn:hover { opacity: 0.88; }
+  .fbtn:disabled { opacity: 0.4; cursor: not-allowed; }
+  /* OUTPUT */
+  #peca-out { display: none; flex-direction: column; flex: 1; overflow: hidden; }
+  #peca-out-bar { padding: 11px 16px; border-bottom: 0.5px solid var(--border); display: flex; align-items: center; gap: 8px; flex-shrink: 0; background: var(--bg-secondary); }
+  #peca-out-bar span { flex: 1; font-size: 13px; font-weight: 600; color: var(--text-primary); }
+  .out-btn { padding: 6px 12px; font-size: 12px; border: 0.5px solid var(--border-md); border-radius: var(--radius-md); background: var(--bg-primary); color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; gap: 5px; transition: all 0.12s; }
+  .out-btn:hover { background: var(--bg-secondary); color: var(--text-primary); }
+  #peca-text { flex: 1; overflow-y: auto; padding: 20px; font-size: 13px; line-height: 1.85; color: var(--text-primary); white-space: pre-wrap; font-family: var(--font); }
+  #peca-text::-webkit-scrollbar { width: 4px; }
+  #peca-text::-webkit-scrollbar-thumb { background: var(--border-md); border-radius: 4px; }
+  .spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin .7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  /* API KEY BANNER */
+  #api-banner { background: #FFF3CD; border-bottom: 0.5px solid #FFD700; padding: 10px 16px; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+  #api-banner p { font-size: 12px; color: #856404; flex: 1; }
+  #api-banner input { border: 0.5px solid #FFD700; border-radius: 6px; padding: 5px 9px; font-size: 12px; font-family: var(--font); width: 260px; outline: none; background: white; }
+  #api-banner button { padding: 5px 12px; background: var(--accent); color: white; border: none; border-radius: 6px; font-size: 12px; cursor: pointer; }
+  .bubble strong { font-weight: 600; }
+  @media (max-width: 600px) {
+    #sidebar { width: 170px; }
+    .bubble { max-width: 90%; }
+    .fgrid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="topbar">
+    <div class="av"><i class="ti ti-gavel"></i></div>
+    <div class="ti-info">
+      <div class="name">Especialista Trabalhista & Calculista</div>
+      <div class="sub">Liquidação · Reflexos · Peças Processuais · Jurisprudência TST/STF</div>
+    </div>
+    <div class="status"><div class="dot"></div>IA Ativa</div>
+  </div>
+
+  <div id="api-banner">
+    <i class="ti ti-key" style="color:#856404;font-size:16px;flex-shrink:0"></i>
+    <p>Insira sua chave da API Anthropic para usar o sistema. Obtenha em <a href="https://console.anthropic.com" target="_blank" style="color:var(--accent)">console.anthropic.com</a></p>
+    <input type="password" id="apiKeyInput" placeholder="sk-ant-..." />
+    <button onclick="saveKey()">Salvar</button>
+  </div>
+
+  <div id="tabs">
+    <div class="tab active" onclick="switchTab('calc')"><i class="ti ti-calculator"></i> Calculista</div>
+    <div class="tab" onclick="switchTab('pecas')"><i class="ti ti-file-text"></i> Peças Processuais</div>
+  </div>
+
+  <div id="content">
+    <!-- CALCULISTA -->
+    <div id="calc-panel" class="panel active" style="flex-direction:column">
+      <div class="chips">
+        <div class="chip" onclick="sendChip('Calcular rescisão sem justa causa')">⚖️ Rescisão SJC</div>
+        <div class="chip" onclick="sendChip('Calcular horas extras e reflexos em DSR, férias, 13º, FGTS e aviso-prévio')">⏱️ HE + Reflexos</div>
+        <div class="chip" onclick="sendChip('Liquidação de sentença trabalhista')">📋 Liquidação</div>
+        <div class="chip" onclick="sendChip('Atualização monetária: IPCA-E e SELIC pós ADC 58/59')">💰 Atualização</div>
+        <div class="chip" onclick="sendChip('Calcular adicional de insalubridade ou periculosidade e reflexos')">🧪 Insalubridade</div>
+        <div class="chip" onclick="sendChip('Como elaborar impugnação aos cálculos e quais pontos atacar?')">🔍 Impugnação</div>
+        <div class="chip" onclick="sendChip('Súmulas do TST mais relevantes para cálculos trabalhistas')">📚 Súmulas TST</div>
+        <div class="chip" onclick="sendChip('INSS e IRRF trabalhista: como calcular as contribuições?')">🏛️ INSS & IRRF</div>
+        <div class="chip" onclick="sendChip('Como calcular diferenças salariais e reflexos?')">💼 Dif. Salariais</div>
+        <div class="chip" onclick="sendChip('Calcular comissões e reflexos trabalhistas')">📊 Comissões</div>
+      </div>
+      <div id="msgs">
+        <div class="msg bot">
+          <div class="mav bav"><i class="ti ti-calculator"></i></div>
+          <div class="bubble">
+            Olá! Sou seu <strong>calculista trabalhista</strong>.<br><br>
+            Informe os dados do caso — salário, datas, jornada, tipo de dispensa — e calculo com precisão técnica:<br><br>
+            ⚖️ Verbas rescisórias · ⏱️ Horas extras e reflexos · 💰 Atualização monetária<br>
+            📋 Liquidação de sentença · 🏛️ INSS & IRRF · 📚 Jurisprudência TST/STF
+          </div>
+        </div>
+      </div>
+      <div id="ibar">
+        <textarea id="uinput" placeholder="Descreva o caso com os dados disponíveis (salário, admissão, demissão, jornada...)" rows="1"></textarea>
+        <button id="sbtn" onclick="handleSend()" title="Enviar"><i class="ti ti-send"></i></button>
+      </div>
+    </div>
+
+    <!-- PEÇAS PROCESSUAIS -->
+    <div id="pecas-panel" class="panel" style="flex-direction:column">
+      <div id="pecas-split">
+        <div id="sidebar">
+          <div class="cat-title">Ações Principais</div>
+          <div class="peca-item active" onclick="selectPeca(this,'reclamacao')">Reclamação Trabalhista</div>
+          <div class="peca-item" onclick="selectPeca(this,'consignacao')">Consignação em Pagamento</div>
+          <div class="peca-item" onclick="selectPeca(this,'cumprimento')">Ação de Cumprimento</div>
+          <div class="peca-item" onclick="selectPeca(this,'inquerito')">Inquérito p/ Falta Grave</div>
+          <div class="peca-item" onclick="selectPeca(this,'dissidio')">Dissídio Coletivo</div>
+          <div class="cat-title">Liquidação & Execução</div>
+          <div class="peca-item" onclick="selectPeca(this,'liquidacao')">Liquidação de Sentença</div>
+          <div class="peca-item" onclick="selectPeca(this,'execucao')">Execução Trabalhista</div>
+          <div class="peca-item" onclick="selectPeca(this,'embargos_exec')">Embargos à Execução</div>
+          <div class="peca-item" onclick="selectPeca(this,'impugnacao')">Impugnação aos Cálculos</div>
+          <div class="peca-item" onclick="selectPeca(this,'embargos_terc')">Embargos de Terceiro</div>
+          <div class="peca-item" onclick="selectPeca(this,'excecao')">Exceção de Pré-Executividade</div>
+          <div class="cat-title">Tutelas & Cautelares</div>
+          <div class="peca-item" onclick="selectPeca(this,'tutela_urgencia')">Tutela de Urgência</div>
+          <div class="peca-item" onclick="selectPeca(this,'tutela_evidencia')">Tutela de Evidência</div>
+          <div class="peca-item" onclick="selectPeca(this,'producao_provas')">Produção Antecipada de Provas</div>
+          <div class="peca-item" onclick="selectPeca(this,'protesto')">Protesto Judicial</div>
+          <div class="peca-item" onclick="selectPeca(this,'arresto')">Arresto / Sequestro</div>
+          <div class="cat-title">Ações Constitucionais</div>
+          <div class="peca-item" onclick="selectPeca(this,'mandado_seguranca')">Mandado de Segurança</div>
+          <div class="peca-item" onclick="selectPeca(this,'reclamacao_const')">Reclamação Constitucional</div>
+          <div class="cat-title">Ações Especiais</div>
+          <div class="peca-item" onclick="selectPeca(this,'rescisoria')">Ação Rescisória</div>
+          <div class="peca-item" onclick="selectPeca(this,'anulatoria')">Ação Anulatória</div>
+          <div class="peca-item" onclick="selectPeca(this,'homologacao')">Homologação de Acordo</div>
+          <div class="peca-item" onclick="selectPeca(this,'acp')">Ação Civil Pública</div>
+          <div class="cat-title">Recursos</div>
+          <div class="peca-item" onclick="selectPeca(this,'recurso_ordinario')">Recurso Ordinário</div>
+          <div class="peca-item" onclick="selectPeca(this,'recurso_revista')">Recurso de Revista</div>
+          <div class="peca-item" onclick="selectPeca(this,'agravo_peticao')">Agravo de Petição</div>
+          <div class="peca-item" onclick="selectPeca(this,'agravo_instrumento')">Agravo de Instrumento</div>
+          <div class="peca-item" onclick="selectPeca(this,'embargos_decl')">Embargos de Declaração</div>
+          <div class="cat-title">Defesa do Reclamado</div>
+          <div class="peca-item" onclick="selectPeca(this,'contestacao')">Contestação</div>
+          <div class="peca-item" onclick="selectPeca(this,'contrarrazoes')">Contrarrazões</div>
+          <div class="peca-item" onclick="selectPeca(this,'parecer_tecnico')">Parecer Técnico-Contábil</div>
+        </div>
+        <div id="pecas-main">
+          <div id="peca-form"><div id="form-inner"></div></div>
+          <div id="peca-out">
+            <div id="peca-out-bar">
+              <span id="out-title">Peça gerada</span>
+              <button class="out-btn" onclick="copyPeca()"><i class="ti ti-copy"></i> Copiar</button>
+              <button class="out-btn" onclick="downloadPeca()"><i class="ti ti-download"></i> Baixar .txt</button>
+              <button class="out-btn" onclick="backToForm()"><i class="ti ti-arrow-left"></i> Voltar</button>
+            </div>
+            <div id="peca-text"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── API KEY ───────────────────────────────────────────────
+let API_KEY = localStorage.getItem('trabalhista_api_key') || '';
+if (API_KEY) document.getElementById('api-banner').style.display = 'none';
+
+function saveKey() {
+  API_KEY = document.getElementById('apiKeyInput').value.trim();
+  if (API_KEY) {
+    localStorage.setItem('trabalhista_api_key', API_KEY);
+    document.getElementById('api-banner').style.display = 'none';
+  }
+}
+
+// ─── SYSTEM PROMPTS ────────────────────────────────────────
+const CALC_SYS = `Você é um especialista sênior em cálculos trabalhistas judiciais brasileiros. Responda com precisão técnica, citando artigos, súmulas e OJs do TST. Apresente memória de cálculo com fórmulas explícitas e tabelas quando houver números. Cubra reflexos, atualização monetária (IPCA-E pré-judicial, SELIC pós-ajuizamento conforme ADC 58/59), INSS e IRRF. Se faltar dado essencial, solicite objetivamente. Use linguagem técnica jurídica e contábil. Nunca invente jurisprudência ou valores.`;
+
+const PECA_SYS = `Você é um advogado trabalhista sênior especializado em elaboração de peças processuais. Redija peças completas, técnicas e fundamentadas, seguindo a estrutura formal exigida pela CLT, NCPC subsidiário e jurisprudência do TST. Inclua: endereçamento correto, qualificação das partes, narração dos fatos, fundamentos jurídicos com artigos e súmulas do TST, pedidos detalhados com valores quando possível, valor da causa e fecho formal com requerimentos. Use linguagem forense adequada e adapte a peça aos dados fornecidos. Nunca invente súmulas ou decisões.`;
+
+// ─── PEÇAS CONFIG ──────────────────────────────────────────
+const PECAS = {
+  reclamacao:{title:'Reclamação Trabalhista',desc:'Petição inicial da reclamação trabalhista.',fields:[
+    {id:'vara',label:'Vara do Trabalho / Cidade',ph:'Ex: 3ª Vara do Trabalho de São Paulo/SP'},
+    {id:'reclamante',label:'Nome do Reclamante',ph:'Nome completo'},
+    {id:'cpf_reclamante',label:'CPF e Endereço do Reclamante',ph:''},
+    {id:'reclamado',label:'Nome do Reclamado (Empregador)',ph:'Razão social'},
+    {id:'cnpj',label:'CNPJ e Endereço do Reclamado',ph:''},
+    {id:'admissao',label:'Data de Admissão',ph:'dd/mm/aaaa'},
+    {id:'demissao',label:'Data de Demissão',ph:'dd/mm/aaaa ou "em curso"'},
+    {id:'salario',label:'Último Salário (R$)',ph:'Ex: R$ 3.500,00'},
+    {id:'funcao',label:'Função / Cargo',ph:''},
+    {id:'jornada',label:'Jornada Contratual e Real',ph:'Ex: 8h/dia, 44h/sem — trabalhava 10h/dia'},
+    {id:'dispensa',label:'Tipo de Dispensa',type:'select',opts:['Sem justa causa','Com justa causa','Pedido de demissão','Rescisão indireta','Ainda empregado']},
+    {id:'temas',label:'Verbas / Temas Pleiteados',ta:true,ph:'Ex: horas extras, reflexos, FGTS + 40%, férias, 13º, dano moral...'},
+    {id:'fatos',label:'Descrição dos Fatos',ta:true,ph:'Relate o contexto da relação de trabalho e os fatos relevantes...'},
+  ]},
+  contestacao:{title:'Contestação',desc:'Defesa do reclamado em resposta à reclamação.',fields:[
+    {id:'processo',label:'Número do Processo',ph:'0000000-00.0000.5.00.0000'},
+    {id:'vara',label:'Vara do Trabalho',ph:''},
+    {id:'reclamante',label:'Nome do Reclamante',ph:''},
+    {id:'reclamado',label:'Nome do Reclamado',ph:''},
+    {id:'pedidos',label:'Pedidos do Reclamante (resumo)',ta:true,ph:'Liste os pedidos feitos na reclamação...'},
+    {id:'defesa',label:'Fatos e Argumentos de Defesa',ta:true,ph:'Descreva os fatos sob a ótica do empregador e os argumentos para cada pedido...'},
+    {id:'provas',label:'Provas Disponíveis',ta:true,ph:'Ex: cartões de ponto, holerites, TRCT assinado, CCT, controle de jornada...'},
+  ]},
+  impugnacao:{title:'Impugnação aos Cálculos',desc:'Impugnação técnica aos cálculos apresentados pelo exequente.',fields:[
+    {id:'processo',label:'Número do Processo',ph:''},
+    {id:'vara',label:'Vara do Trabalho',ph:''},
+    {id:'exequente',label:'Nome do Exequente',ph:''},
+    {id:'executado',label:'Nome do Executado',ph:''},
+    {id:'total_exequente',label:'Valor Apresentado pelo Exequente (R$)',ph:''},
+    {id:'pontos',label:'Pontos Impugnados',ta:true,ph:'Ex: índice de correção indevido (TR em vez de IPCA-E), reflexos em duplicidade, juros em excesso, verba não constante da condenação...'},
+    {id:'valor_correto',label:'Valor Correto Apurado (R$)',ph:''},
+    {id:'diferenca',label:'Diferença / Excesso de Execução (R$)',ph:''},
+  ]},
+  embargos_exec:{title:'Embargos à Execução',desc:'Oposição à execução trabalhista.',fields:[
+    {id:'processo',label:'Número do Processo',ph:''},
+    {id:'executado',label:'Nome do Executado / Embargante',ph:''},
+    {id:'exequente',label:'Nome do Exequente / Embargado',ph:''},
+    {id:'valor',label:'Valor em Execução (R$)',ph:''},
+    {id:'fundamentos',label:'Fundamentos dos Embargos',ta:true,ph:'Ex: excesso de execução, prescrição intercorrente, quitação, coisa julgada, nulidade da penhora...'},
+    {id:'provas',label:'Documentos / Provas',ta:true,ph:''},
+  ]},
+  embargos_terc:{title:'Embargos de Terceiro',desc:'Defesa de bens de terceiro atingido pela execução.',fields:[
+    {id:'processo',label:'Número do Processo',ph:''},
+    {id:'embargante',label:'Nome do Embargante (Terceiro)',ph:''},
+    {id:'bem',label:'Bem Penhorado',ta:true,ph:'Descreva o bem atingido, número de matrícula, localização...'},
+    {id:'titulo',label:'Título de Propriedade / Posse',ta:true,ph:'Como o embargante comprova ser proprietário ou possuidor legítimo...'},
+  ]},
+  excecao:{title:'Exceção de Pré-Executividade',desc:'Arguição de matéria de ordem pública sem garantia do juízo.',fields:[
+    {id:'processo',label:'Número do Processo',ph:''},
+    {id:'executado',label:'Nome do Executado',ph:''},
+    {id:'materia',label:'Matéria Arguida',ta:true,ph:'Ex: prescrição, ilegitimidade de parte, inexigibilidade do título, nulidade absoluta...'},
+    {id:'provas',label:'Prova Documental (pré-constituída)',ta:true,ph:''},
+  ]},
+  tutela_urgencia:{title:'Tutela de Urgência',desc:'Pedido de tutela antecipada de urgência.',fields:[
+    {id:'processo',label:'Processo ou "Nova Ação"',ph:''},
+    {id:'vara',label:'Vara do Trabalho',ph:''},
+    {id:'requerente',label:'Nome do Requerente',ph:''},
+    {id:'requerido',label:'Nome do Requerido',ph:''},
+    {id:'pedido',label:'Objeto da Tutela',type:'select',opts:['Reintegração ao emprego','Restabelecimento de plano de saúde','Liberação do FGTS','Pagamento de salários atrasados','Cessação de assédio moral','Outro']},
+    {id:'pedido_outro',label:'Especifique (se "Outro")',ph:''},
+    {id:'probabilidade',label:'Probabilidade do Direito',ta:true,ph:'Fundamentos jurídicos que demonstram o direito provável...'},
+    {id:'perigo',label:'Perigo de Dano / Urgência',ta:true,ph:'Por que não pode aguardar o desfecho do processo principal...'},
+  ]},
+  tutela_evidencia:{title:'Tutela de Evidência',desc:'Pedido de tutela sem urgência, com direito evidente (art. 311 NCPC).',fields:[
+    {id:'processo',label:'Número do Processo',ph:''},
+    {id:'requerente',label:'Nome do Requerente',ph:''},
+    {id:'requerido',label:'Nome do Requerido',ph:''},
+    {id:'direito',label:'Direito Evidente',ta:true,ph:''},
+    {id:'fundamento',label:'Hipótese do art. 311 NCPC',type:'select',opts:['Abuso do direito de defesa','Prova documental e tese pacificada em julgamento de casos repetitivos','Pedido reipersecutório fundado em prova documental','Decisão sumular ou vinculante']},
+  ]},
+  producao_provas:{title:'Produção Antecipada de Provas',desc:'Pedido de produção de provas antes do processo principal.',fields:[
+    {id:'requerente',label:'Nome do Requerente',ph:''},
+    {id:'requerido',label:'Nome do Requerido (se houver)',ph:''},
+    {id:'tipo',label:'Tipo de Prova',type:'select',opts:['Perícia técnica','Oitiva de testemunha','Exibição de documentos','Inspeção judicial']},
+    {id:'objeto',label:'Objeto da Prova / Fatos a Provar',ta:true,ph:''},
+    {id:'urgencia',label:'Motivo da Antecipação',ta:true,ph:'Por que não pode aguardar o processo principal (risco de perecimento, testemunha doente, documentos em risco...)'},
+  ]},
+  protesto:{title:'Protesto Judicial',desc:'Protesto para interrupção da prescrição.',fields:[
+    {id:'protestante',label:'Nome do Protestante',ph:''},
+    {id:'protestado',label:'Nome do Protestado',ph:''},
+    {id:'vara',label:'Vara do Trabalho / Foro',ph:''},
+    {id:'direito',label:'Direito a Preservar',ta:true,ph:'Ex: créditos de horas extras do período de 2020 a 2024, cujo prazo prescricional está próximo do vencimento...'},
+  ]},
+  arresto:{title:'Arresto / Sequestro de Bens',desc:'Medida de garantia patrimonial cautelar.',fields:[
+    {id:'requerente',label:'Nome do Requerente',ph:''},
+    {id:'requerido',label:'Nome do Requerido',ph:''},
+    {id:'valor',label:'Valor do Crédito a Garantir (R$)',ph:''},
+    {id:'bens',label:'Bens a Arresto/Sequestrar',ta:true,ph:'Identifique os bens se souber; caso contrário, peça ao juiz que os identifique'},
+    {id:'fundamento',label:'Fumus Boni Iuris e Periculum in Mora',ta:true,ph:'Demonstre a probabilidade do direito e o risco de dilapidação patrimonial...'},
+  ]},
+  mandado_seguranca:{title:'Mandado de Segurança',desc:'Contra ato ilegal ou abusivo de autoridade judicial.',fields:[
+    {id:'impetrante',label:'Nome do Impetrante',ph:''},
+    {id:'autoridade',label:'Autoridade Coatora',ph:'Ex: MM. Juiz da 5ª VT de São Paulo/SP'},
+    {id:'processo',label:'Processo de Origem',ph:''},
+    {id:'ato',label:'Ato Coator Impugnado',ta:true,ph:'Descreva a decisão, ato ou omissão que viola direito líquido e certo...'},
+    {id:'direito',label:'Direito Líquido e Certo Violado',ta:true,ph:'Qual direito foi violado e como comprová-lo de plano...'},
+  ]},
+  reclamacao_const:{title:'Reclamação Constitucional',desc:'Para preservar autoridade de decisão vinculante do STF ou TST.',fields:[
+    {id:'reclamante',label:'Nome do Reclamante',ph:''},
+    {id:'reclamado',label:'Autoridade Reclamada',ph:''},
+    {id:'paradigma',label:'Decisão Paradigma',ph:'Ex: Súmula Vinculante nº 5, Tese do Tema 1046 STF...'},
+    {id:'decisao_violadora',label:'Decisão que Viola o Paradigma',ta:true,ph:'Descreva a decisão reclamada e como ofende o paradigma...'},
+  ]},
+  rescisoria:{title:'Ação Rescisória',desc:'Desconstituição de decisão transitada em julgado.',fields:[
+    {id:'autor',label:'Nome do Autor',ph:''},
+    {id:'reu',label:'Nome do Réu',ph:''},
+    {id:'processo_orig',label:'Processo de Origem',ph:''},
+    {id:'decisao',label:'Decisão a Rescindir (resumo)',ta:true,ph:''},
+    {id:'fundamento',label:'Fundamento Legal (art. 966 NCPC)',type:'select',opts:['Inc. I — Prevaricação/concussão/corrupção','Inc. II — Impedimento ou incompetência absoluta','Inc. III — Dolo ou coação da parte','Inc. IV — Ofensa à coisa julgada','Inc. V — Violação manifesta de norma jurídica','Inc. VI — Prova falsa','Inc. VII — Prova nova (documental)','Inc. VIII — Erro de fato verificável no processo']},
+    {id:'desenvolvimento',label:'Desenvolvimento do Fundamento Rescisório',ta:true,ph:'Explique como o fundamento escolhido se aplica ao caso concreto...'},
+  ]},
+  anulatoria:{title:'Ação Anulatória',desc:'Anulação de cláusula coletiva ou auto de infração.',fields:[
+    {id:'autor',label:'Nome do Autor',ph:''},
+    {id:'reu',label:'Nome do Réu',ph:''},
+    {id:'objeto',label:'Objeto da Anulação',type:'select',opts:['Cláusula de CCT','Cláusula de ACT','Auto de infração do MTE','Acordo extrajudicial homologado','Outro']},
+    {id:'clausula',label:'Identificação da Cláusula / Instrumento',ta:true,ph:'Transcreva ou identifique a cláusula ou instrumento impugnado...'},
+    {id:'vicio',label:'Vício / Motivo da Nulidade',ta:true,ph:'Ex: violação de norma de ordem pública, ausência de quórum, objeto ilícito, vício de consentimento...'},
+  ]},
+  homologacao:{title:'Homologação de Acordo Extrajudicial',desc:'Pedido conjunto de homologação (art. 855-B CLT).',fields:[
+    {id:'empregado',label:'Nome do Empregado',ph:''},
+    {id:'empregador',label:'Nome do Empregador',ph:''},
+    {id:'vara',label:'Vara do Trabalho',ph:''},
+    {id:'valor',label:'Valor Total do Acordo (R$)',ph:''},
+    {id:'parcelas',label:'Forma de Pagamento',ph:'Ex: à vista no ato da homologação, em 3 parcelas...'},
+    {id:'verbas',label:'Verbas Objeto do Acordo',ta:true,ph:'Liste as verbas quitadas e informe se há quitação ampla ou parcial...'},
+    {id:'advogados',label:'Advogados das Partes (nome e OAB)',ta:true,ph:''},
+  ]},
+  acp:{title:'Ação Civil Pública',desc:'Tutela de direitos coletivos ou difusos trabalhistas.',fields:[
+    {id:'autor',label:'Autor (MPT / Sindicato / Entidade)',ph:''},
+    {id:'reu',label:'Réu (Empregador)',ph:''},
+    {id:'vara',label:'Vara do Trabalho / Foro',ph:''},
+    {id:'fatos',label:'Fatos e Conduta Ilícita Coletiva',ta:true,ph:'Descreva a conduta ilegal praticada de forma coletiva ou sistêmica...'},
+    {id:'direitos',label:'Direitos Coletivos / Difusos Violados',ta:true,ph:'Ex: ausência de EPI para todos os trabalhadores, jornada ilegal para toda categoria, FGTS não recolhido coletivamente...'},
+    {id:'pedidos',label:'Pedidos',ta:true,ph:'Obrigação de fazer/não fazer, indenização por dano coletivo, multa diária...'},
+  ]},
+  consignacao:{title:'Consignação em Pagamento',desc:'Depósito judicial de verbas com recusa do empregado.',fields:[
+    {id:'consignante',label:'Nome do Consignante (Empregador)',ph:''},
+    {id:'consignado',label:'Nome do Consignado (Empregado)',ph:''},
+    {id:'vara',label:'Vara do Trabalho',ph:''},
+    {id:'valor',label:'Valor a Consignar (R$)',ph:''},
+    {id:'verbas',label:'Verbas Incluídas',ta:true,ph:''},
+    {id:'motivo',label:'Motivo da Consignação',ta:true,ph:'Ex: empregado recusou receber, endereço desconhecido, litígio sobre o valor...'},
+  ]},
+  cumprimento:{title:'Ação de Cumprimento',desc:'Execução de cláusula de CCT/ACT ou sentença normativa.',fields:[
+    {id:'sindicato',label:'Sindicato Autor',ph:''},
+    {id:'empresa',label:'Empresa Ré',ph:''},
+    {id:'vara',label:'Vara do Trabalho',ph:''},
+    {id:'instrumento',label:'Instrumento Descumprido',type:'select',opts:['Convenção Coletiva de Trabalho','Acordo Coletivo de Trabalho','Sentença Normativa']},
+    {id:'vigencia',label:'Vigência do Instrumento',ph:'Ex: 2023/2024'},
+    {id:'clausula',label:'Cláusula Descumprida',ta:true,ph:'Transcreva ou descreva a cláusula e como foi descumprida...'},
+    {id:'periodo',label:'Período do Descumprimento',ph:''},
+  ]},
+  inquerito:{title:'Inquérito para Apuração de Falta Grave',desc:'Ação para dispensa de empregado estável.',fields:[
+    {id:'empregador',label:'Nome do Empregador',ph:''},
+    {id:'empregado',label:'Nome do Empregado',ph:''},
+    {id:'vara',label:'Vara do Trabalho',ph:''},
+    {id:'estabilidade',label:'Tipo de Estabilidade',type:'select',opts:['Dirigente sindical','Membro da CIPA','Gestante','Acidente de trabalho (Súmula 378 TST)','Pré-aposentadoria','Outro']},
+    {id:'falta',label:'Falta Grave Cometida',ta:true,ph:'Descreva com detalhes a conduta que caracteriza a falta grave (art. 482 CLT)...'},
+    {id:'provas',label:'Provas da Falta Grave',ta:true,ph:'Documentos, gravações, testemunhos, registro de ocorrência...'},
+  ]},
+  dissidio:{title:'Dissídio Coletivo',desc:'Ação de dissídio coletivo econômico, jurídico ou de greve.',fields:[
+    {id:'suscitante',label:'Suscitante',ph:'Ex: Sindicato dos Trabalhadores de...'},
+    {id:'suscitado',label:'Suscitado',ph:'Ex: Sindicato Patronal ou empresa'},
+    {id:'tipo',label:'Tipo de Dissídio',type:'select',opts:['Econômico (fixação de condições de trabalho)','Jurídico (interpretação de norma)','De greve (paralisação coletiva)']},
+    {id:'base',label:'Base Territorial',ph:'Ex: Estado de São Paulo'},
+    {id:'negociacao',label:'Negociação Prévia (tentativa frustrada)',ta:true,ph:'Demonstre a tentativa de negociação coletiva e sua frustração...'},
+    {id:'pretensoes',label:'Pretensões / Cláusulas Pleiteadas',ta:true,ph:''},
+  ]},
+  recurso_ordinario:{title:'Recurso Ordinário',desc:'Recurso contra sentença de 1ª instância para o TRT.',fields:[
+    {id:'processo',label:'Número do Processo',ph:''},
+    {id:'vara',label:'Vara do Trabalho de Origem',ph:''},
+    {id:'recorrente',label:'Nome do Recorrente',ph:''},
+    {id:'recorrido',label:'Nome do Recorrido',ph:''},
+    {id:'sentenca',label:'Data da Sentença / Publicação do Acórdão',ph:''},
+    {id:'decisao',label:'O que foi decidido (resumo)',ta:true,ph:''},
+    {id:'razoes',label:'Razões do Recurso — Pontos a Reformar',ta:true,ph:'Ex: erro na aplicação da Súmula X, violação do art. Y da CLT, quantum excessivo, ausência de fundamentação...'},
+  ]},
+  recurso_revista:{title:'Recurso de Revista',desc:'Recurso ao TST por violação de lei ou divergência jurisprudencial.',fields:[
+    {id:'processo',label:'Número do Processo',ph:''},
+    {id:'recorrente',label:'Nome do Recorrente',ph:''},
+    {id:'acordao',label:'Acórdão Recorrido (TRT e nº)',ph:'Ex: TRT da 2ª Região, Acórdão nº 00000'},
+    {id:'pressupostos',label:'Pressupostos de Admissibilidade',ta:true,ph:'Indicar: violação de art. X da CLT/CF, contrariedade à Súmula Y TST, divergência com OJ Z, contrariedade à tese do Tema W...'},
+    {id:'merito',label:'Mérito — Razões de Reforma',ta:true,ph:''},
+  ]},
+  agravo_peticao:{title:'Agravo de Petição',desc:'Recurso contra decisão na fase de execução.',fields:[
+    {id:'processo',label:'Número do Processo',ph:''},
+    {id:'agravante',label:'Nome do Agravante',ph:''},
+    {id:'agravado',label:'Nome do Agravado',ph:''},
+    {id:'decisao',label:'Decisão Agravada',ta:true,ph:'Descreva a decisão e a data...'},
+    {id:'razoes',label:'Razões do Agravo',ta:true,ph:''},
+  ]},
+  agravo_instrumento:{title:'Agravo de Instrumento',desc:'Destrancamento de recurso denegado na origem.',fields:[
+    {id:'processo',label:'Número do Processo',ph:''},
+    {id:'agravante',label:'Nome do Agravante',ph:''},
+    {id:'recurso',label:'Recurso Denegado',type:'select',opts:['Recurso de Revista','Recurso Ordinário','Agravo de Petição']},
+    {id:'fundamentos',label:'Por que o Recurso é Admissível',ta:true,ph:'Demonstre o preenchimento dos pressupostos de admissibilidade que o juízo de origem negou...'},
+  ]},
+  embargos_decl:{title:'Embargos de Declaração',desc:'Por omissão, obscuridade, contradição ou erro material.',fields:[
+    {id:'processo',label:'Número do Processo',ph:''},
+    {id:'embargante',label:'Nome do Embargante',ph:''},
+    {id:'decisao',label:'Decisão Embargada',ph:'Ex: Sentença de xx/xx/xxxx, Acórdão nº...'},
+    {id:'vicio',label:'Vício Apontado',type:'select',opts:['Omissão (art. 1.022, I NCPC)','Obscuridade (art. 1.022, I NCPC)','Contradição (art. 1.022, I NCPC)','Erro material (art. 1.022, III NCPC)']},
+    {id:'ponto',label:'Ponto Omisso / Obscuro / Contraditório',ta:true,ph:'Indique com precisão o vício e o ponto que deve ser sanado...'},
+    {id:'efeito',label:'Efeito Pretendido',type:'select',opts:['Apenas sanar o vício (sem efeitos infringentes)','Com efeitos infringentes para modificar o julgado']},
+  ]},
+  contrarrazoes:{title:'Contrarrazões',desc:'Resposta ao recurso interposto pela parte contrária.',fields:[
+    {id:'processo',label:'Número do Processo',ph:''},
+    {id:'recorrido',label:'Nome do Recorrido (quem apresenta)',ph:''},
+    {id:'recorrente',label:'Nome do Recorrente',ph:''},
+    {id:'tipo',label:'Tipo de Recurso a Rebater',type:'select',opts:['Recurso Ordinário','Recurso de Revista','Agravo de Petição','Agravo de Instrumento','Embargos de Declaração']},
+    {id:'decisao',label:'Decisão Recorrida e o que o Recorrente Quer Reformar',ta:true,ph:''},
+    {id:'argumentos',label:'Argumentos para Manutenção da Decisão',ta:true,ph:'Fundamentos jurídicos para que o recurso seja desprovido...'},
+  ]},
+  parecer_tecnico:{title:'Parecer Técnico-Contábil',desc:'Parecer técnico sobre cálculos trabalhistas para fins judiciais.',fields:[
+    {id:'processo',label:'Número do Processo',ph:''},
+    {id:'perito',label:'Nome do Calculista / Perito',ph:''},
+    {id:'condenacao',label:'Objeto da Condenação (dispositivo)',ta:true,ph:'Transcreva o dispositivo condenatório da sentença/acórdão...'},
+    {id:'calculo_parte',label:'Valor Apresentado pela Outra Parte (R$)',ph:''},
+    {id:'divergencias',label:'Pontos de Divergência Técnica',ta:true,ph:'Ex: índice de correção incorreto, base de cálculo equivocada, reflexos indevidos, INSS em duplicidade...'},
+    {id:'valor_correto',label:'Valor Correto Apurado (R$)',ph:''},
+    {id:'diferenca',label:'Diferença / Excesso (R$)',ph:''},
+    {id:'metodologia',label:'Metodologia Utilizada',ta:true,ph:'Descreva os critérios e índices utilizados nos cálculos...'},
+  ]},
+  liquidacao:{title:'Liquidação de Sentença',desc:'Apresentação de cálculos em liquidação de sentença.',fields:[
+    {id:'processo',label:'Número do Processo',ph:''},
+    {id:'vara',label:'Vara do Trabalho',ph:''},
+    {id:'exequente',label:'Nome do Exequente',ph:''},
+    {id:'executado',label:'Nome do Executado',ph:''},
+    {id:'condenacao',label:'Dispositivo da Sentença (transcrição)',ta:true,ph:''},
+    {id:'verbas',label:'Verbas e Valores Calculados',ta:true,ph:'Liste: verba | período | base de cálculo | valor apurado'},
+    {id:'total',label:'Total Líquido (R$)',ph:''},
+    {id:'indice',label:'Índice de Correção',type:'select',opts:['IPCA-E pré-judicial + SELIC pós-ajuizamento (ADC 58/59)','SELIC integral','TR + juros 1% a.m.','Conforme sentença']},
+  ]},
+  execucao:{title:'Execução Trabalhista',desc:'Petição para início da fase de execução.',fields:[
+    {id:'processo',label:'Número do Processo',ph:''},
+    {id:'exequente',label:'Nome do Exequente',ph:''},
+    {id:'executado',label:'Nome do Executado',ph:''},
+    {id:'titulo',label:'Título Executivo',type:'select',opts:['Sentença condenatória transitada em julgado','Acordo judicial homologado','Termo de conciliação','Certidão de dívida ativa trabalhista']},
+    {id:'valor',label:'Valor da Execução (R$)',ph:''},
+    {id:'meio',label:'Meio de Execução Requerido',type:'select',opts:['Bloqueio SISBAJUD','Penhora de bens','Penhora de faturamento','Penhora online (BacenJud)','Expropriação de bens']},
+    {id:'obs',label:'Observações / Patrimônio Identificado',ta:true,ph:'Se conhecer bens do executado, informe...'},
+  ]},
+};
+
+// ─── STATE ─────────────────────────────────────────────────
+let calcHistory = [], chatLoading = false, currentPeca = 'reclamacao';
+
+// ─── TAB SWITCH ────────────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    t.classList.toggle('active', (i===0&&tab==='calc')||(i===1&&tab==='pecas'));
+  });
+  document.getElementById('calc-panel').classList.toggle('active', tab==='calc');
+  document.getElementById('pecas-panel').classList.toggle('active', tab==='pecas');
+}
+
+// ─── PEÇA FORM ─────────────────────────────────────────────
+function selectPeca(el, key) {
+  document.querySelectorAll('.peca-item').forEach(x => x.classList.remove('active'));
+  el.classList.add('active');
+  currentPeca = key;
+  document.getElementById('peca-out').style.display = 'none';
+  document.getElementById('peca-form').style.display = 'block';
+  renderForm(key);
+}
+
+function renderForm(key) {
+  const cfg = PECAS[key] || PECAS['reclamacao'];
+  let html = `<h3>${cfg.title}</h3><p class="desc">${cfg.desc}</p>`;
+  cfg.fields.forEach(f => {
+    html += `<div class="frow"><label for="f_${f.id}">${f.label}</label>`;
+    if (f.ta) html += `<textarea id="f_${f.id}" placeholder="${f.ph||''}" rows="3"></textarea>`;
+    else if (f.type==='select') html += `<select id="f_${f.id}">${f.opts.map(o=>`<option>${o}</option>`).join('')}</select>`;
+    else html += `<input type="text" id="f_${f.id}" placeholder="${f.ph||''}">`;
+    html += `</div>`;
+  });
+  html += `<div class="frow"><label for="f_obs">Observações adicionais / estratégia processual</label><textarea id="f_obs" placeholder="Inclua informações relevantes, instruções específicas ou estratégia processual..." rows="3"></textarea></div>`;
+  html += `<button class="fbtn" id="gen-btn" onclick="gerarPeca()"><i class="ti ti-wand"></i> Gerar Peça Processual</button>`;
+  document.getElementById('form-inner').innerHTML = html;
+}
+
+function getFormData(key) {
+  const cfg = PECAS[key] || PECAS['reclamacao'];
+  let lines = [];
+  cfg.fields.forEach(f => {
+    const el = document.getElementById('f_' + f.id);
+    if (el && el.value.trim()) lines.push(`${f.label}: ${el.value.trim()}`);
+  });
+  const obs = document.getElementById('f_obs');
+  if (obs && obs.value.trim()) lines.push(`Observações: ${obs.value.trim()}`);
+  return lines.join('\n');
+}
+
+async function gerarPeca() {
+  if (!API_KEY) { alert('Insira a chave da API Anthropic no topo da página.'); return; }
+  const btn = document.getElementById('gen-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> Gerando peça...';
+  const cfg = PECAS[currentPeca] || PECAS['reclamacao'];
+  const data = getFormData(currentPeca);
+  const prompt = `Elabore uma peça processual trabalhista completa do tipo: ${cfg.title}\n\nDados fornecidos:\n${data || '(sem dados preenchidos — elabore um modelo padrão)'}\n\nRedija a peça completa e formal, com todos os requisitos processuais exigidos.`;
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 2000, system: PECA_SYS, messages: [{ role: 'user', content: prompt }] })
+    });
+    const d = await res.json();
+    if (d.error) throw new Error(d.error.message);
+    const text = d.content?.map(b => b.text||'').join('') || 'Erro ao gerar peça.';
+    document.getElementById('out-title').textContent = cfg.title;
+    document.getElementById('peca-text').textContent = text;
+    document.getElementById('peca-form').style.display = 'none';
+    document.getElementById('peca-out').style.display = 'flex';
+  } catch(e) {
+    alert('Erro: ' + e.message);
+  }
+  btn.disabled = false;
+  btn.innerHTML = '<i class="ti ti-wand"></i> Gerar Peça Processual';
+}
+
+function copyPeca() {
+  const t = document.getElementById('peca-text').textContent;
+  navigator.clipboard.writeText(t).then(() => {
+    const b = document.querySelectorAll('.out-btn')[0];
+    const orig = b.innerHTML;
+    b.innerHTML = '<i class="ti ti-check"></i> Copiado!';
+    setTimeout(() => b.innerHTML = orig, 2000);
+  });
+}
+
+function downloadPeca() {
+  const text = document.getElementById('peca-text').textContent;
+  const title = document.getElementById('out-title').textContent.replace(/\s+/g,'_');
+  const blob = new Blob([text], {type:'text/plain;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${title}_${new Date().toISOString().slice(0,10)}.txt`;
+  a.click();
+}
+
+function backToForm() {
+  document.getElementById('peca-out').style.display = 'none';
+  document.getElementById('peca-form').style.display = 'block';
+}
+
+// ─── CHAT ──────────────────────────────────────────────────
+function sendChip(t) { document.getElementById('uinput').value = t; handleSend(); }
+
+document.getElementById('uinput').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
+});
+document.getElementById('uinput').addEventListener('input', function() {
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+});
+
+function addMsg(role, text) {
+  const w = document.createElement('div'); w.className = 'msg ' + role;
+  const av = document.createElement('div'); av.className = 'mav ' + (role==='bot'?'bav':'uav');
+  av.innerHTML = role==='bot' ? '<i class="ti ti-calculator"></i>' : '<i class="ti ti-user"></i>';
+  const b = document.createElement('div'); b.className = 'bubble';
+  b.innerHTML = text
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/`([^`]+)`/g, '<code style="font-family:monospace;background:rgba(0,0,0,0.07);padding:1px 5px;border-radius:3px;font-size:12px">$1</code>')
+    .replace(/\n/g, '<br>');
+  w.appendChild(av); w.appendChild(b);
+  document.getElementById('msgs').appendChild(w);
+  document.getElementById('msgs').scrollTop = 99999;
+  return b;
+}
+
+function showTyping() {
+  const w = document.createElement('div'); w.className = 'msg bot'; w.id = 'typ';
+  const av = document.createElement('div'); av.className = 'mav bav'; av.innerHTML = '<i class="ti ti-calculator"></i>';
+  const b = document.createElement('div'); b.className = 'bubble';
+  b.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+  w.appendChild(av); w.appendChild(b);
+  document.getElementById('msgs').appendChild(w);
+  document.getElementById('msgs').scrollTop = 99999;
+}
+function removeTyping() { const t = document.getElementById('typ'); if (t) t.remove(); }
+
+async function handleSend() {
+  if (!API_KEY) { alert('Insira a chave da API Anthropic no topo da página.'); return; }
+  const inp = document.getElementById('uinput');
+  const text = inp.value.trim();
+  if (!text || chatLoading) return;
+  chatLoading = true; document.getElementById('sbtn').disabled = true;
+  inp.value = ''; inp.style.height = 'auto';
+  addMsg('user', text);
+  calcHistory.push({ role: 'user', content: text });
+  showTyping();
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 1500, system: CALC_SYS, messages: calcHistory })
+    });
+    const d = await res.json();
+    if (d.error) throw new Error(d.error.message);
+    removeTyping();
+    const reply = d.content?.map(b => b.text||'').join('') || 'Erro.';
+    calcHistory.push({ role: 'assistant', content: reply });
+    addMsg('bot', reply);
+  } catch(e) {
+    removeTyping();
+    addMsg('bot', 'Erro: ' + e.message);
+  }
+  chatLoading = false; document.getElementById('sbtn').disabled = false; inp.focus();
+}
+
+renderForm('reclamacao');
+</script>
+</body>
+</html>
